@@ -93,4 +93,4 @@ jobs:
           script: |
             cd k8s/
             kubectl apply -f frontend.yaml
-          secrets: inherit
+        secrets: inherit

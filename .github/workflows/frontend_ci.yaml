@@ -5,14 +5,19 @@ name: Frontend CI - Build & Push Image
 on:
   # Manual trigger
   workflow_dispatch:
-
-  # Automatically on pushes to main branch
-  push:
+  # Add the pull request workflow to development
+  pull_request:
     branches:
-      - main
-    paths: # Only trigger if changes are in the frontend directory
+      - development
+    paths:
       - 'frontend/**'
-      - '.github/workflows/frontend_ci.yml' # Trigger if this workflow file changes
+      - '.github/workflows/frontend_ci.yml'
+
+  
+# Add permissions
+permissions:
+  contents: read
+  id-token: write
 
 # Define global environment variables that can be used across jobs
 env:
@@ -33,9 +38,11 @@ jobs:
 
     # Azure login using a Service Principal secret
     - name: Azure Login
-      uses: azure/login@v1
+      uses: azure/login@v2 #updated to version 2
       with:
-        creds: ${{ secrets.AZURE_CREDENTIALS }}
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
     # Login to Azure Container Registry (ACR)
     - name: Login to Azure Container Registry

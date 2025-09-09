@@ -37,11 +37,12 @@ jobs:
       aks_cluster_name:   ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.aks_cluster_name || vars.AKS_CLUSTER_NAME }}
       aks_resource_group: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.aks_resource_group || vars.AKS_RESOURCE_GROUP }}
       script: |
+        ACR_ID=$(az acr show -n ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.aks_acr_name || vars.AKS_ACR_NAME }} --query id -o tsv)
         # Attach ACR (works for push-to-main or manual)
         az aks update \
           --name ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.aks_cluster_name || vars.AKS_CLUSTER_NAME }} \
           --resource-group ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.aks_resource_group || vars.AKS_RESOURCE_GROUP }} \
-          --attach-acr ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.aks_acr_name || vars.AKS_ACR_NAME }}
+          --attach-acr "$ACR_ID"   
 
         echo "Deploying backend infrastructure..."
         cd k8s/

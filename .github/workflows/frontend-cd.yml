@@ -85,8 +85,8 @@ jobs:
         run: az logout
 
   # Calling the reusable workflow 
-  deploy_frontend:
-    needs: build the frontend
+  apply_frontend:
+    needs: build_frontend
     uses: ./.github/workflows/deploy_aks.yml
     secrets: inherit
     with:

@@ -86,7 +86,7 @@ jobs:
 
   # Calling the reusable workflow 
   apply_frontend:
-    needs: build_frontend
+    needs: deploy_frontend
     uses: ./.github/workflows/deploy_aks.yml
     secrets: inherit
     with:

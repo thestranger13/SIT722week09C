@@ -84,13 +84,14 @@ jobs:
       - name: Logout ACR identity
         run: az logout
 
-      # Calling the reusable workflow 
-      - name: Deploy frontend via reusable
-        uses: ./.github/workflows/deploy_aks.yml
-        with:
-          aks_cluster_name:  ${{ inputs.aks_cluster_name }}
-          aks_resource_group: ${{ inputs.aks_resource_group }}
-          script: |
-            cd k8s/
-            kubectl apply -f frontend.yaml
-          secrets: inherit
+  # Calling the reusable workflow 
+  deploy_frontend:
+    needs: build the frontend
+    uses: ./.github/workflows/deploy_aks.yml
+    secrets: inherit
+    with:
+      aks_cluster_name:  ${{ inputs.aks_cluster_name }}
+      aks_resource_group: ${{ inputs.aks_resource_group }}
+      script: |
+        cd k8s/
+        kubectl apply -f frontend.yaml

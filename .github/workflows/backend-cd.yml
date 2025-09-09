@@ -99,8 +99,8 @@ jobs:
       - name: Capture Order Service IP for Workflow Output
         id: get_order_ip
         run: echo "external_ip=${{ env.ORDER_IP }}" >> $GITHUB_OUTPUT
-    secrets: inherit
-
+        
+  secrets: inherit
 
       # Remove the Logout
       # - name: Logout from Azure

@@ -1,5 +1,3 @@
-# week08/.github/workflows/frontend-cd.yml
-
 name: CD - Deploy Frontend to AKS
 
 # This workflow can be called by other workflows and takes inputs.
@@ -39,6 +37,11 @@ on:
         required: true
         type: string
 
+# Add permissions
+permissions:
+  contents: read
+  id-token: write
+
 jobs:
   deploy_frontend:
     runs-on: ubuntu-latest
@@ -50,9 +53,11 @@ jobs:
 
       # Azure login using a Service Principal secret
       - name: Azure Login
-        uses: azure/login@v1
+        uses: azure/login@v2
         with:
-          creds: ${{ secrets.AZURE_CREDENTIALS }}
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
       # Login to Azure Container Registry (ACR)
       - name: Login to Azure Container Registry
@@ -79,24 +84,14 @@ jobs:
       - name: Logout ACR identity
         run: az logout
 
-      # Login with ACR AKS Credentials
-      - name: Azure Login
-        uses: azure/login@v1
-        with:
-          creds: ${{ secrets.AZURE_AKS_CREDENTIALS }}
-
-      - name: Set Kubernetes context (get AKS credentials)
-        uses: azure/aks-set-context@v3
-        with:
-          resource-group: ${{ inputs.aks_resource_group }}
-          cluster-name: ${{ inputs.aks_cluster_name }}
-
-      - name: Deploy Frontend to AKS
-        run: |
-          echo "Deploying frontend with latest tag to AKS cluster: ${{ inputs.aks_cluster_name }}"
-          cd k8s/
-          # Ensure frontend-service.yaml is configured with your ACR
-          kubectl apply -f frontend.yaml
-
-      - name: Logout from Azure (AKS deployment)
-        run: az logout
+  # Calling the reusable workflow 
+  deploy_frontend:
+    needs: build the frontend
+    uses: ./.github/workflows/deploy_aks.yml
+    secrets: inherit
+    with:
+      aks_cluster_name:  ${{ inputs.aks_cluster_name }}
+      aks_resource_group: ${{ inputs.aks_resource_group }}
+      script: |
+        cd k8s/
+        kubectl apply -f frontend.yaml

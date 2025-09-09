@@ -18,7 +18,7 @@ spec:
     spec:
       containers:
       - name: frontend-container
-        image: sit722registry.azurecr.io/frontend:latest #updated with reference to ACR
+        image: sit722week09cacr.azurecr.io/frontend:latest #updated with reference to ACR
         imagePullPolicy: Always
         ports:
         - containerPort: 80

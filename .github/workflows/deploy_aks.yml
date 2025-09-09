@@ -1,0 +1,45 @@
+name: Deployment to AKS (reusable for Backend-CD and Frontend-CD)
+
+on:
+  workflow_call:
+    inputs:
+      aks_cluster_name:
+        required: true
+        type: string
+      aks_resource_group:
+        required: true
+        type: string
+      script:
+        description: "Shell commands to run against AKS"
+        required: true
+        type: string
+
+# Add permissions
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # Azure login using a Service Principal secret
+      - name: Log in to Azure
+        uses: azure/login@v2 #updated to version 2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      # Set AKS context 
+      - name: Set Kubernetes context (get AKS credentials)
+        uses: azure/aks-set-context@v3
+        with:
+          resource-group: ${{ inputs.aks_resource_group }}
+          cluster-name:  ${{ inputs.aks_cluster_name }}
+
+      - name: Execute AKS script
+        run: ${{ inputs.script }}
